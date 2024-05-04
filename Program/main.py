@@ -92,7 +92,7 @@ if __name__ == '__main__':
 	if 'frames.npy' not in get_files_in_directory('.'):
 		create_dataset(dataset_files, dataset_sizes)
 
-	main_models = [importlib.import_module('modules.main_models.Conv_Image_V1')]
+	main_models = [importlib.import_module('modules.main_models.Conv_Image_V2')]
 	saved_models = get_files_in_directory('saved_models')
 	interference_result = 0
 	for model in main_models:
@@ -100,15 +100,16 @@ if __name__ == '__main__':
 		if model_filename not in saved_models:
 			frames = np.memmap('frames.npy', dtype='u1', mode='r', shape=(*dataset_sizes, 3))
 			labels = np.load('labels.npy', mmap_mode='c')
-			temp_model = model.Image_V1().train(frames, labels)
+			temp_model = model.Model().train(frames, labels)
 			temp_model.save_model('saved_models/'+model_filename)
-		temp_model = model.Image_V1().load_model('saved_models/'+model_filename)
-		interference_result = temp_model.interference(args.interference_filename, batch_size=2048)
+		temp_model = model.Model().load_model('saved_models/'+model_filename)
+		interference_result = temp_model.interference(args.interference_filename, batch_size=24)
+	print(interference_result, interference_result.shape)
 
 
-	postedit_algorithms = [importlib.import_module('modules.postedit_algorithms.Mean_Image_V1')]
+	postedit_algorithms = [importlib.import_module('modules.postedit_algorithms.Mean_Image_V2')]
 	for algorithm in postedit_algorithms:
-		interference_result = algorithm.Image_V1({1:0, 2:0.5, 3:0, 4:1, 5:0.1}).post_edit(interference_result)
+		interference_result = algorithm.Model({1:0, 2:0.5, 3:0, 4:1, 5:0.1}).post_edit(interference_result)
 
 
 	edit_video(args.interference_filename, interference_result)
