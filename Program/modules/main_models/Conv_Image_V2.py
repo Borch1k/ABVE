@@ -14,7 +14,7 @@ class Model:
 	
 	Название модели: Conv_Image_V1
 	"""
-	def __init__(self, frames_number: int = 11, step: int = 5, frame_size: tuple = (270, 480, 3), learning_rate: float = 1e-5):
+	def __init__(self, frames_number: int, step: int, frame_size: tuple = (270, 480, 3), learning_rate: float = 1e-5):
 		"""
 		Создаёт и компилирует модель
 
@@ -57,7 +57,7 @@ class Model:
 			metrics=['accuracy'])
 
 
-	def train(self, frames: np.ndarray, labels: np.ndarray, batch_size: int = 16, epochs: int = None, batch_retrains: int = 5, verbose: int = 1):
+	def train(self, frames: np.ndarray, labels: np.ndarray, batch_size: int = 512, epochs: int = None, batch_retrains: int = 5, verbose: int = 1):
 		"""
 		Функция для обучения модели
 
@@ -150,15 +150,13 @@ class Model:
 				print("Can't receive frame (stream end?). Exiting ...")
 				break
 			temp_frames.append(cv.resize(frame, (self.frame_size[1],self.frame_size[0])))
-			if (len(temp_frames) == self.step*batch_size+self.frames_number):
+			if (len(temp_frames) == (batch_size-1)*self.step+self.frames_number):
 				X = np.lib.stride_tricks\
 				  .sliding_window_view(np.array(temp_frames, dtype='i1'), self.mega_frame_size)[::self.step]\
-				  .reshape(batch_size+1, self.mega_frame_size[0], self.mega_frame_size[1], self.mega_frame_size[2], self.mega_frame_size[3])
+				  .reshape(batch_size, self.mega_frame_size[0], self.mega_frame_size[1], self.mega_frame_size[2], self.mega_frame_size[3])
 				temp_pred = np.argmax(self.model.predict(X, verbose=verbose),axis=1)
+				print(temp_pred)
 				interfer_pred = np.concatenate((interfer_pred, temp_pred))
-				del temp_frames[:-self.frames_number]
+				del temp_frames[:self.step-self.frames_number]
 				gc.collect()
-				i += 1
-				if i == 3:
-					break
 		return interfer_pred
