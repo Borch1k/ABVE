@@ -1,3 +1,5 @@
+Presentation can be found here (big size - because of embedded videofiles): https://drive.google.com/file/d/1hwT9FsilKc_fOj--CQWyfHlrSBqn0MpD/view?usp=sharing
+
 Code, tests and results for the third course project by the name: "Action-Based Video Editing"
 
 Main steps for Editing is:
